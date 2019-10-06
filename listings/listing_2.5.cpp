@@ -14,6 +14,7 @@ std::thread f()
 std::thread g()
 {
     void some_other_function(int);
+    // pass param
     std::thread t(some_other_function,42);
     return t;
 }

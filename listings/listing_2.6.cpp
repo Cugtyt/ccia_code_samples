@@ -1,5 +1,6 @@
 #include <thread>
 #include <utility>
+#include <iostream>
 
 class scoped_thread
 {
@@ -27,8 +28,10 @@ void do_something(int& i)
 struct func
 {
     int& i;
-
-    func(int& i_):i(i_){}
+    // without passing `ostream`, 
+    // there will be nothing to show
+    std::ostream& os;
+    func(int& i_, std::ostream& os):i(i_), os(os){}
 
     void operator()()
     {
@@ -36,6 +39,7 @@ struct func
         {
             do_something(i);
         }
+        os << "i=" << i << "\n";
     }
 };
 
@@ -44,13 +48,19 @@ void do_something_in_current_thread()
 
 void f()
 {
-    int some_local_state;
-    scoped_thread t(std::thread(func(some_local_state)));
-        
+    // variable should be init
+    int some_local_state = 0;
+    // thread will hold its own context, 
+    // when `f()` finished, the `int& i` is still valid.
+    scoped_thread t(std::thread(func(some_local_state, std::cout)));
+
     do_something_in_current_thread();
-}
+}   // end of `f()`, thread is `join()`ed
 
 int main()
 {
     f();
+    // thread will finish here, as it `join()`ed,
+    // and "the end" will always printed after "i=1000000"
+    std::cout << "the end\n";
 }

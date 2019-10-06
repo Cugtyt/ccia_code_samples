@@ -32,11 +32,14 @@ void f()
     {
         do_something_in_current_thread();
     }
+    // 1. if some exception happened, `join()` before throw,
+    // the thread will be fine
     catch(...)
     {
         t.join();
         throw;
     }
+    // 2. if everything is all right, then `join()`
     t.join();
 }
 
